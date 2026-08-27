@@ -2,96 +2,135 @@
 
 # 🚀 NexaWorkspace SaaS
 
-### Plataforma B2B Multi-Tenant para gestão de workspaces, projetos, usuários e assinaturas
+### Enterprise B2B Multi-Tenant SaaS Platform
+
+**Workspaces · Projects · RBAC · Billing · Events · Rate Limiting · Observability · CI/CD**
 
 [![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-8.10-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+[![Kafka](https://img.shields.io/badge/Apache%20Kafka-4.3-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![Prometheus](https://img.shields.io/badge/Prometheus-3.14-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)](https://prometheus.io/)
+[![Grafana](https://img.shields.io/badge/Grafana-13.2-F46800?style=for-the-badge&logo=grafana&logoColor=white)](https://grafana.com/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub-Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
 
-**Um SaaS de portfólio com arquitetura de produto real:** autenticação JWT, RBAC, isolamento por tenant, billing sandbox, auditoria, migrações de banco, CI/CD e execução full stack via Docker.
+> **Arquitetura de produto, não apenas CRUD.**
+
+O **NexaWorkspace** é uma plataforma SaaS B2B criada para demonstrar conceitos de engenharia de software utilizados em produtos reais: isolamento multi-tenant, segurança, eventos assíncronos, billing, observabilidade, infraestrutura containerizada e CI.
 
 </div>
 
 ---
 
-## 🎯 Sobre o projeto
+## 🎯 O problema que o projeto resolve
 
-O **NexaWorkspace SaaS** demonstra como estruturar um produto SaaS B2B moderno, indo muito além de um CRUD tradicional.
+Cada organização possui um workspace isolado com seus próprios usuários, projetos, assinatura e trilha de auditoria. O backend determina o tenant autenticado pelo JWT e aplica o escopo diretamente nas consultas.
 
-Cada empresa possui um **workspace isolado**, com seus próprios usuários, projetos, assinatura e registros de auditoria. O backend determina o tenant autenticado pelo JWT e aplica o escopo diretamente nas consultas ao banco.
+> **Regra central de segurança:** o frontend nunca escolhe o `tenant_id`. O tenant vem da identidade autenticada.
 
-> **Regra central de segurança:** o frontend não escolhe o `tenant_id`. O contexto do tenant vem da identidade autenticada e toda operação sensível aplica tenant scoping no backend.
+```java
+repo.findByIdAndTenant_Id(projectId, principal.tenantId())
+```
+
+Buscar apenas por `projectId` seria insuficiente em um SaaS e poderia permitir **cross-tenant data leakage**.
 
 ---
 
-## 🧰 Tech Stack
+# 🧰 Tech Stack
 
-### Backend
+## Backend
 
 | Tecnologia | Uso |
 |---|---|
 | **Java 21** | Linguagem principal |
-| **Spring Boot 4.1** | API REST e infraestrutura backend |
+| **Spring Boot 4.1** | API REST |
 | **Spring Security** | Segurança e autorização |
 | **JWT / JJWT** | Autenticação stateless |
-| **RBAC** | Perfis `OWNER`, `ADMIN` e `MEMBER` |
-| **Spring Data JPA** | Persistência e repositories |
+| **RBAC** | `OWNER`, `ADMIN`, `MEMBER` |
+| **Spring Data JPA** | Persistência |
 | **Hibernate** | ORM |
-| **Flyway** | Versionamento de schema |
-| **Spring Boot Actuator** | Health checks e métricas |
-| **Maven** | Build e dependências |
+| **Flyway** | Migrações de banco |
+| **Spring Kafka** | Eventos de domínio |
+| **Spring Data Redis** | Rate limiting distribuído |
+| **Micrometer** | Instrumentação |
+| **Actuator** | Health e métricas |
+| **Maven** | Build |
 
-### Frontend
+## Frontend
 
 | Tecnologia | Uso |
 |---|---|
-| **React 19** | Interface web |
-| **TypeScript** | Tipagem estática |
-| **Vite** | Build e ambiente de desenvolvimento |
+| **React 19** | UI |
+| **TypeScript 7** | Tipagem |
+| **Vite 8** | Build/dev server |
 | **Lucide React** | Ícones |
-| **CSS responsivo** | Design system e layout |
-| **Nginx** | Servidor do frontend e reverse proxy |
+| **Nginx** | Servidor web |
 
-### Dados, DevOps e Infra
+## Dados e mensageria
 
 | Tecnologia | Uso |
 |---|---|
-| **PostgreSQL 18** | Banco relacional |
-| **Docker** | Containerização |
-| **Docker Compose** | Orquestração local full stack |
-| **GitHub Actions** | Pipeline CI |
-| **Git / GitHub** | Versionamento e entrega |
+| **PostgreSQL 18** | Banco principal |
+| **Redis 8.10** | Rate limiting / base para cache distribuído |
+| **Apache Kafka 4.3** | Event-driven architecture |
+
+## Observabilidade e DevOps
+
+| Tecnologia | Uso |
+|---|---|
+| **Prometheus 3.14** | Coleta de métricas |
+| **Grafana 13.2** | Dashboards |
+| **Docker** | Containers |
+| **Docker Compose** | Plataforma local |
+| **GitHub Actions** | CI |
+
+## Billing
+
+| Provedor | Implementação |
+|---|---|
+| **Stripe** | Checkout Session para assinatura |
+| **Mercado Pago** | Assinatura recorrente via `preapproval` |
+| **Sandbox** | Default seguro sem cobrança real |
 
 ---
 
-## 🏗️ Arquitetura
+# 🏗️ Arquitetura
 
 ```text
-┌─────────────────────────────────────────────┐
-│                React + TypeScript           │
-│          Dashboard / Projects / Billing     │
-└──────────────────────┬──────────────────────┘
-                       │ HTTPS / REST
-                       ▼
-┌─────────────────────────────────────────────┐
-│                Spring Boot API              │
-│                                             │
-│  Auth ─ JWT ─ RBAC ─ Tenant Context         │
-│    │              │                         │
-│    ├─ Projects    ├─ Billing                │
-│    ├─ Dashboard   └─ Audit                  │
-└──────────────────────┬──────────────────────┘
-                       │ JPA / Hibernate
-                       ▼
-┌─────────────────────────────────────────────┐
-│                 PostgreSQL                  │
-│ tenants │ users │ projects │ subscriptions  │
-│                 audit_logs                  │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                  React 19 + TypeScript + Nginx                  │
+│           Dashboard · Projects · Billing · Auth                 │
+└──────────────────────────────┬───────────────────────────────────┘
+                               │ REST / JWT
+                               ▼
+┌──────────────────────────────────────────────────────────────────┐
+│                       Spring Boot API                            │
+│                                                                  │
+│ Auth ─ JWT ─ RBAC ─ Tenant Context ─ Redis Rate Limiting        │
+│  │            │              │                 │                │
+│  ├ Projects   ├ Dashboard    ├ Billing         └ Audit Log      │
+│  │            │              │                                  │
+│  └────────────┴────── Domain Events ────────────────┐           │
+└──────────────────────────────┬──────────────────────┼───────────┘
+                               │ JPA                  │ Kafka
+                               ▼                      ▼
+                    ┌───────────────────┐   ┌───────────────────┐
+                    │   PostgreSQL 18   │   │ Apache Kafka 4.3  │
+                    └───────────────────┘   └───────────────────┘
+                               │
+                               │ Actuator / Micrometer
+                               ▼
+                    ┌───────────────────┐
+                    │ Prometheus 3.14   │
+                    └─────────┬─────────┘
+                              ▼
+                    ┌───────────────────┐
+                    │   Grafana 13.2    │
+                    └───────────────────┘
 ```
 
 ### Fluxo Multi-Tenant
@@ -107,60 +146,206 @@ SaasPrincipal
   ↓
 Service Layer
   ↓
-query = resource_id + tenant_id
+resource_id + tenant_id
   ↓
 PostgreSQL
 ```
 
-Isso reduz o risco clássico de **cross-tenant data leakage**.
+---
+
+# ✨ Funcionalidades implementadas
+
+### Identidade e segurança
+
+- ✅ Cadastro de organização + tenant
+- ✅ Usuário `OWNER` automático
+- ✅ JWT stateless
+- ✅ BCrypt
+- ✅ RBAC
+- ✅ Tenant scoping
+- ✅ Audit Log
+- ✅ Rate limiting Redis para login e cadastro
+- ✅ Secrets por variáveis de ambiente
+
+### Projetos
+
+- ✅ CRUD completo
+- ✅ Isolamento por tenant
+- ✅ `PROJECT_CREATED`
+- ✅ `PROJECT_UPDATED`
+- ✅ `PROJECT_DELETED`
+
+### Billing
+
+- ✅ `FREE`, `PRO`, `BUSINESS`
+- ✅ Sandbox padrão
+- ✅ Checkout Stripe
+- ✅ Assinatura Mercado Pago
+- ✅ Modo LIVE ativado explicitamente
+- ✅ UI para seleção do gateway
+- ✅ Evento `BILLING_CHECKOUT_CREATED`
+- ✅ Evento `SUBSCRIPTION_PLAN_CHANGED`
+
+### Observabilidade
+
+- ✅ `/actuator/health`
+- ✅ `/actuator/metrics`
+- ✅ `/actuator/prometheus`
+- ✅ Prometheus provisionado
+- ✅ Grafana provisionado
+- ✅ Dashboard de requests, 5xx, heap e p95
+
+### Engenharia / DevOps
+
+- ✅ Flyway
+- ✅ Docker Compose
+- ✅ Kafka KRaft
+- ✅ Redis AOF
+- ✅ Health checks
+- ✅ CI backend
+- ✅ CI frontend
+- ✅ Validação `docker compose config`
 
 ---
 
-## ✨ Funcionalidades
+# 📨 Event-Driven Architecture
 
-- ✅ Cadastro de empresa e criação automática do tenant
-- ✅ Criação automática do usuário `OWNER`
-- ✅ Login com JWT
-- ✅ Autorização com RBAC
-- ✅ Isolamento de dados por `tenant_id`
-- ✅ Dashboard com KPIs do workspace
-- ✅ CRUD de projetos
-- ✅ Planos `FREE`, `PRO` e `BUSINESS`
-- ✅ Upgrade/downgrade em billing sandbox
-- ✅ Audit Log de operações críticas
-- ✅ Migrações versionadas com Flyway
-- ✅ Health check com Actuator
-- ✅ Frontend responsivo
-- ✅ Docker Compose full stack
-- ✅ Pipeline CI backend + frontend
+Os eventos de domínio são disparados durante a operação de negócio e enviados para Kafka **após o commit** da transação.
 
----
-
-## 🔐 Segurança
-
-O projeto implementa princípios importantes de segurança para SaaS:
-
-- JWT stateless
-- Senhas com BCrypt
-- RBAC por perfil
-- Tenant scoping no backend
-- Queries sensíveis com `id + tenant_id`
-- CORS configurado
-- Rotas públicas limitadas a autenticação e health check
-- Audit trail para ações importantes
-- Secrets externalizáveis por variáveis de ambiente
-
-Exemplo conceitual:
-
-```java
-repo.findByIdAndTenant_Id(projectId, principal.tenantId())
+```text
+Database Transaction
+       │
+       ├── business state
+       ├── audit log
+       └── Spring domain event
+                    │
+                    ▼
+          TransactionPhase.AFTER_COMMIT
+                    │
+                    ▼
+                 Kafka
 ```
 
-Buscar apenas por `projectId` seria insuficiente em um SaaS multi-tenant.
+Tópico padrão:
+
+```text
+nexaworkspace.domain-events.v1
+```
+
+Exemplo:
+
+```json
+{
+  "eventId": "uuid",
+  "tenantId": "uuid",
+  "actorId": "uuid",
+  "type": "PROJECT_CREATED",
+  "aggregateType": "PROJECT",
+  "aggregateId": "uuid",
+  "occurredAt": "2026-08-27T12:00:00Z",
+  "payload": {
+    "name": "Platform Hardening",
+    "status": "ACTIVE"
+  }
+}
+```
+
+> Próxima evolução para garantia forte de entrega: **Transactional Outbox Pattern**.
 
 ---
 
-## 📁 Estrutura do projeto
+# 🚦 Redis Rate Limiting
+
+Endpoints públicos sensíveis possuem limites compartilhados entre instâncias:
+
+```text
+POST /api/auth/login
+10 tentativas / minuto
+
+POST /api/auth/register
+5 tentativas / 10 minutos
+```
+
+Se Redis ficar indisponível, o limiter trabalha em **fail-open** e registra a falha, evitando transformar a queda do cache em indisponibilidade total da autenticação.
+
+---
+
+# 💳 Billing: Sandbox x Live
+
+Por padrão:
+
+```env
+BILLING_MODE=sandbox
+```
+
+Nenhuma cobrança real é feita.
+
+### Checkout
+
+```http
+POST /api/billing/checkout
+Authorization: Bearer <jwt>
+Content-Type: application/json
+```
+
+```json
+{
+  "plan": "PRO",
+  "provider": "STRIPE"
+}
+```
+
+Também é possível usar:
+
+```json
+{
+  "plan": "BUSINESS",
+  "provider": "MERCADO_PAGO"
+}
+```
+
+### Ativar cobrança real
+
+```env
+BILLING_MODE=live
+```
+
+Stripe:
+
+```env
+STRIPE_SECRET_KEY=
+STRIPE_PRO_PRICE_ID=
+STRIPE_BUSINESS_PRICE_ID=
+```
+
+Mercado Pago:
+
+```env
+MERCADO_PAGO_ACCESS_TOKEN=
+MP_PRO_MONTHLY_BRL=49.90
+MP_BUSINESS_MONTHLY_BRL=149.90
+```
+
+> O redirect do checkout **não deve ser usado como confirmação definitiva de pagamento**. A ativação final de assinatura é uma etapa futura baseada em webhooks autenticados e idempotentes.
+
+---
+
+# 📈 Observabilidade
+
+Prometheus coleta métricas da API a cada 15 segundos.
+
+Grafana já sobe com datasource e dashboard provisionados.
+
+Painéis iniciais:
+
+- Requests HTTP/min
+- Erros 5xx/min
+- JVM Heap
+- Latência HTTP p95
+
+---
+
+# 📁 Estrutura
 
 ```text
 NexaWorkspace-SaaS/
@@ -169,175 +354,125 @@ NexaWorkspace-SaaS/
 │   │   ├── audit/
 │   │   ├── auth/
 │   │   ├── billing/
+│   │   │   └── provider/
 │   │   ├── common/
 │   │   ├── config/
 │   │   ├── dashboard/
+│   │   ├── event/
 │   │   ├── project/
+│   │   ├── ratelimit/
 │   │   ├── security/
 │   │   ├── tenant/
 │   │   └── user/
-│   ├── src/main/resources/db/migration/
-│   ├── Dockerfile
-│   └── pom.xml
+│   └── src/main/resources/
+│
 ├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── types/
-│   ├── Dockerfile
-│   └── nginx.conf
+│   └── src/
+│
+├── monitoring/
+│   ├── prometheus.yml
+│   └── grafana/
+│       ├── dashboards/
+│       └── provisioning/
+│
 ├── docs/
-│   └── ARCHITECTURE.md
-├── .github/workflows/
-│   └── ci.yml
+│   ├── ARCHITECTURE.md
+│   └── PLATFORM-HARDENING.md
+│
+├── .github/workflows/ci.yml
 ├── docker-compose.yml
-└── .env.example
+├── .env.example
+└── README.md
 ```
 
 ---
 
-## 🚀 Executando com Docker
+# 🚀 Executando
 
-### Pré-requisitos
+### 1. Copie as variáveis
 
-- Docker Desktop
-- Docker Compose
+```bash
+cp .env.example .env
+```
 
-### Subir toda a plataforma
+### 2. Suba toda a plataforma
 
 ```bash
 docker compose up --build
 ```
 
-### Aplicações
+### Serviços
 
-| Serviço | URL |
+| Serviço | Endereço |
 |---|---|
 | Frontend | `http://localhost:3000` |
 | Backend | `http://localhost:8080` |
-| Health Check | `http://localhost:8080/actuator/health` |
+| Health | `http://localhost:8080/actuator/health` |
+| Prometheus | `http://localhost:9090` |
+| Grafana | `http://localhost:3001` |
 | PostgreSQL | `localhost:5432` |
-
-Para encerrar:
-
-```bash
-docker compose down
-```
-
-Para remover também os volumes:
-
-```bash
-docker compose down -v
-```
+| Redis | `localhost:6379` |
+| Kafka | `localhost:9092` |
 
 ---
 
-## 💻 Executando em desenvolvimento
+# 🔌 API principal
 
-### Banco
-
-```bash
-docker compose up -d postgres
-```
-
-### Backend
-
-```bash
-cd backend
-mvn spring-boot:run
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Frontend de desenvolvimento:
-
-```text
-http://localhost:5173
-```
-
----
-
-## 🔌 API
-
-| Método | Endpoint | Descrição |
+| Método | Endpoint | Objetivo |
 |---|---|---|
 | `POST` | `/api/auth/register` | Cria tenant + owner |
-| `POST` | `/api/auth/login` | Autentica e retorna JWT |
-| `GET` | `/api/dashboard` | KPIs do tenant |
-| `GET` | `/api/projects` | Lista projetos do tenant |
+| `POST` | `/api/auth/login` | Login JWT |
+| `GET` | `/api/dashboard` | KPIs |
+| `GET` | `/api/projects` | Lista projetos |
 | `POST` | `/api/projects` | Cria projeto |
 | `PUT` | `/api/projects/{id}` | Atualiza projeto |
-| `DELETE` | `/api/projects/{id}` | Exclui projeto |
-| `GET` | `/api/billing` | Consulta assinatura |
-| `PATCH` | `/api/billing/plan` | Altera plano |
-| `GET` | `/api/audit` | Consulta auditoria |
-| `GET` | `/actuator/health` | Health check |
+| `DELETE` | `/api/projects/{id}` | Remove projeto |
+| `GET` | `/api/billing` | Assinatura atual |
+| `POST` | `/api/billing/checkout` | Cria checkout |
+| `PATCH` | `/api/billing/plan` | Troca plano em sandbox |
+| `GET` | `/api/audit` | Audit trail |
+| `GET` | `/actuator/prometheus` | Métricas |
 
 ---
 
-## 🗃️ Modelo de dados
-
-```text
-tenants
-   │
-   ├── users
-   ├── projects
-   ├── subscriptions
-   └── audit_logs
-```
-
-O `tenant_id` é a fronteira lógica entre os clientes da plataforma.
-
----
-
-## ⚙️ CI/CD
-
-O workflow do GitHub Actions executa validações independentes para backend e frontend:
+# ⚙️ CI
 
 ```text
 Push / Pull Request
        │
-       ├── Backend CI
-       │      └── Maven Test
-       │
-       └── Frontend CI
-              └── npm build
+       ├── Maven Test
+       ├── npm build
+       └── docker compose config
 ```
 
 ---
 
-## 🛣️ Roadmap
+# 🛣️ Roadmap
 
-### Próximas evoluções
-
-- [ ] Refresh Token com rotação e revogação
-- [ ] Convite de membros por e-mail
+- [x] Multi-tenancy
+- [x] JWT + RBAC
+- [x] PostgreSQL + Flyway
+- [x] Redis rate limiting
+- [x] Kafka domain events
+- [x] Prometheus
+- [x] Grafana
+- [x] Stripe checkout adapter
+- [x] Mercado Pago subscription adapter
+- [ ] Billing webhooks com assinatura criptográfica e idempotência
+- [ ] Transactional Outbox
+- [ ] Refresh Token + rotação/revogação
 - [ ] OAuth2 / OpenID Connect
-- [ ] Stripe ou Mercado Pago
-- [ ] Webhooks idempotentes
-- [ ] Redis para cache e rate limiting
-- [ ] Kafka para eventos de domínio
-- [ ] OpenTelemetry
-- [ ] Prometheus + Grafana
 - [ ] Testcontainers
-- [ ] Upload de arquivos em S3 / Blob Storage
-- [ ] Deploy AWS / Azure
+- [ ] OpenTelemetry
+- [ ] Retry + DLQ Kafka
+- [ ] AWS / Azure
 - [ ] Kubernetes + HPA
 
 ---
 
-## 🧠 Conceitos demonstrados
+# 🧠 Competências demonstradas
 
-Este projeto foi desenhado para demonstrar conhecimentos valorizados em processos seletivos de engenharia de software:
-
-`Java` · `Spring Boot` · `REST` · `JWT` · `Spring Security` · `RBAC` · `Multi-Tenancy` · `JPA` · `Hibernate` · `PostgreSQL` · `Flyway` · `React` · `TypeScript` · `Docker` · `CI/CD` · `SaaS Architecture` · `Audit Log` · `Clean Separation of Concerns`
+`Java 21` · `Spring Boot` · `REST` · `JWT` · `Spring Security` · `RBAC` · `Multi-Tenancy` · `JPA` · `Hibernate` · `PostgreSQL` · `Flyway` · `Redis` · `Kafka` · `Event-Driven Architecture` · `Prometheus` · `Grafana` · `Micrometer` · `React` · `TypeScript` · `Docker` · `CI/CD` · `Stripe` · `Mercado Pago` · `Audit Log` · `SaaS Architecture`
 
 ---
 
@@ -351,8 +486,8 @@ GitHub: [@juceliocoelho2022](https://github.com/juceliocoelho2022)
 
 <div align="center">
 
-### ⭐ Se este projeto foi útil, considere deixar uma estrela.
+### ⭐ NexaWorkspace SaaS
 
-**NexaWorkspace SaaS — arquitetura de produto, não apenas CRUD.**
+**Backend corporativo · arquitetura SaaS · eventos · observabilidade · DevOps**
 
 </div>
