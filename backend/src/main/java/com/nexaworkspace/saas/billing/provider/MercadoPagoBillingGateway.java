@@ -1,7 +1,7 @@
 package com.nexaworkspace.saas.billing.provider;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import com.nexaworkspace.saas.billing.BillingDtos;
 import com.nexaworkspace.saas.billing.Plan;
 import com.nexaworkspace.saas.common.ApiException;
