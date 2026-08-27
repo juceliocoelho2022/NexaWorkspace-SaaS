@@ -17,8 +17,7 @@ spring:
     enabled: true
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      url: ${REDIS_URL:redis://localhost:6379}
       timeout: 2s
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
@@ -55,6 +54,8 @@ app:
   jwt:
     secret: ${JWT_SECRET:dev-only-change-this-secret-to-at-least-32-bytes-1234567890}
     ttl-minutes: ${JWT_TTL_MINUTES:120}
+  events:
+    enabled: ${EVENTS_ENABLED:true}
   kafka:
     topic: ${KAFKA_DOMAIN_TOPIC:nexaworkspace.domain-events.v1}
   billing:

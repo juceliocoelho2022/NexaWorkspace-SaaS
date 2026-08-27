@@ -62,10 +62,10 @@ services:
       DB_USER: ${DB_USER:-nexa}
       DB_PASSWORD: ${DB_PASSWORD:-nexa123}
       JWT_SECRET: ${JWT_SECRET:-change-this-in-production-super-secret-key-2026-nexaworkspace}
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       KAFKA_DOMAIN_TOPIC: nexaworkspace.domain-events.v1
+      EVENTS_ENABLED: "true"
       BILLING_MODE: ${BILLING_MODE:-sandbox}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}

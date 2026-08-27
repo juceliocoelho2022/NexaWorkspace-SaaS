@@ -14,9 +14,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
     @Bean PasswordEncoder passwordEncoder(){ return new BCryptPasswordEncoder(); }
-    @Bean SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwt) throws Exception {
-        return http.csrf(csrf->csrf.disable()).cors(cors->{}).sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a->a.requestMatchers("/api/auth/**","/actuator/health","/actuator/prometheus").permitAll().anyRequest().authenticated())
-            .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class).build();
+
+    @Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwt) throws Exception {
+        return http
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> {})
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(a -> a
+                .requestMatchers(
+                    "/", "/index.html", "/favicon.ico", "/assets/**",
+                    "/api/auth/**", "/actuator/health"
+                ).permitAll()
+                .anyRequest().authenticated())
+            .addFilterBefore(jwt, UsernamePasswordAuthenticationFilter.class)
+            .build();
     }
 }
