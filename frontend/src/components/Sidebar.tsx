@@ -1,0 +1,4 @@
+import { LayoutDashboard, FolderKanban, CreditCard, LogOut, ShieldCheck } from 'lucide-react'
+import { Logo } from './Logo'
+export type Page='dashboard'|'projects'|'billing'
+export function Sidebar({page,setPage,onLogout}:{page:Page;setPage:(p:Page)=>void;onLogout:()=>void}){return <aside className="sidebar"><Logo/><nav><button className={page==='dashboard'?'active':''} onClick={()=>setPage('dashboard')}><LayoutDashboard/>Visão geral</button><button className={page==='projects'?'active':''} onClick={()=>setPage('projects')}><FolderKanban/>Projetos</button><button className={page==='billing'?'active':''} onClick={()=>setPage('billing')}><CreditCard/>Planos</button></nav><div className="secure"><ShieldCheck/><div><b>Tenant isolado</b><small>JWT + RBAC + auditoria</small></div></div><button className="logout" onClick={onLogout}><LogOut/>Sair</button></aside>}

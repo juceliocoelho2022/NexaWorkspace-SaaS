@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:18.6-alpine
+    environment:
+      POSTGRES_DB: nexaworkspace
+      POSTGRES_USER: nexa
+      POSTGRES_PASSWORD: nexa123
+    ports: ["5432:5432"]
+    volumes: ["nexa_postgres:/var/lib/postgresql"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexa -d nexaworkspace"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/nexaworkspace
+      DB_USER: nexa
+      DB_PASSWORD: nexa123
+      JWT_SECRET: change-this-in-production-super-secret-key-2026-nexaworkspace
+    ports: ["8080:8080"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  frontend:
+    build: ./frontend
+    ports: ["3000:80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  nexa_postgres:
