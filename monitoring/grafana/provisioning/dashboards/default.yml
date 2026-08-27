@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: NexaWorkspace
+    orgId: 1
+    folder: NexaWorkspace
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards

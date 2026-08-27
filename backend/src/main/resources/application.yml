@@ -15,18 +15,56 @@ spring:
           time_zone: UTC
   flyway:
     enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2s
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: nexaworkspace-api
+      auto-offset-reset: earliest
+
 server:
   port: ${PORT:8080}
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       probes:
         enabled: true
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
 app:
   jwt:
     secret: ${JWT_SECRET:dev-only-change-this-secret-to-at-least-32-bytes-1234567890}
     ttl-minutes: ${JWT_TTL_MINUTES:120}
+  kafka:
+    topic: ${KAFKA_DOMAIN_TOPIC:nexaworkspace.domain-events.v1}
+  billing:
+    mode: ${BILLING_MODE:sandbox}
+    frontend-url: ${FRONTEND_URL:http://localhost:3000}
+    stripe:
+      secret-key: ${STRIPE_SECRET_KEY:}
+      pro-price-id: ${STRIPE_PRO_PRICE_ID:}
+      business-price-id: ${STRIPE_BUSINESS_PRICE_ID:}
+    mercado-pago:
+      access-token: ${MERCADO_PAGO_ACCESS_TOKEN:}
+      pro-monthly-brl: ${MP_PRO_MONTHLY_BRL:49.90}
+      business-monthly-brl: ${MP_BUSINESS_MONTHLY_BRL:149.90}
